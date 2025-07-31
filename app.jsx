@@ -366,18 +366,35 @@ function ProjectSubmissionForm() {
     setLoading(true);
     try {
       const url = new URL(formData.project_url);
-      const projectId = url.pathname.split("/").pop();
-      const response = await fetch(`/api/v1/projects/${projectId}`);
+      const pathParts = url.pathname.split("/").filter(Boolean);
+      let response;
+      if (pathParts[0] === "p" && pathParts.length === 2) {
+        const projectId = pathParts[1];
+        response = await fetch(`/api/v1/projects/${projectId}`);
+      } else if (pathParts[0].startsWith("@") && pathParts.length === 2) {
+        const username = pathParts[0].substring(1);
+        const slug = pathParts[1];
+        response = await fetch(`/api/v1/users/${username}/slugs/${slug}`);
+      } else {
+        throw new Error("Invalid WebSim Project URL format. Use /p/PROJECT_ID or /@username/slug format.");
+      }
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Failed to fetch project data: ${response.status} ${errorData}`);
+      }
       const projectData = await response.json();
       const project = projectData.project;
       const site = projectData.site;
+      if (!project) {
+        throw new Error("Could not find project data from the provided URL.");
+      }
       await room.collection("funding_projects").create({
         project_id: project.id,
         title: formData.title || project.title,
         description: formData.description || project.description,
         creator_username: project.created_by.username,
         project_url: formData.project_url,
-        thumbnail_url: site ? `https://images.websim.com/v1/site/${site.id}/600` : null,
+        thumbnail_url: project.thumbnail?.url || (site ? `https://images.websim.com/v1/site/${site.id}/600` : null),
         current_funding: 0,
         funding_goal: formData.funding_goal,
         category: formData.category,
@@ -394,7 +411,8 @@ function ProjectSubmissionForm() {
       });
       alert("Project submitted successfully!");
     } catch (error) {
-      alert("Error submitting project. Please check the URL and try again.");
+      console.error(error);
+      alert(`Error submitting project. Please check the URL and try again. ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -404,7 +422,7 @@ function ProjectSubmissionForm() {
       "input",
       {
         type: "url",
-        placeholder: "WebSim Project URL (e.g., https://websim.com/p/abc123...)",
+        placeholder: "WebSim Project URL (e.g., https://websim.com/p/... or https://websim.com/@user/slug)",
         value: formData.project_url,
         onChange: (e) => setFormData({ ...formData, project_url: e.target.value }),
         required: true,
@@ -414,7 +432,7 @@ function ProjectSubmissionForm() {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 227,
+        lineNumber: 249,
         columnNumber: 13
       },
       this
@@ -432,7 +450,7 @@ function ProjectSubmissionForm() {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 235,
+        lineNumber: 257,
         columnNumber: 13
       },
       this
@@ -450,7 +468,7 @@ function ProjectSubmissionForm() {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 242,
+        lineNumber: 264,
         columnNumber: 13
       },
       this
@@ -465,27 +483,27 @@ function ProjectSubmissionForm() {
           children: [
             /* @__PURE__ */ jsxDEV("option", { value: "games", children: "Games" }, void 0, false, {
               fileName: "<stdin>",
-              lineNumber: 255,
+              lineNumber: 277,
               columnNumber: 21
             }, this),
             /* @__PURE__ */ jsxDEV("option", { value: "tools", children: "Tools" }, void 0, false, {
               fileName: "<stdin>",
-              lineNumber: 256,
+              lineNumber: 278,
               columnNumber: 21
             }, this),
             /* @__PURE__ */ jsxDEV("option", { value: "art", children: "Art" }, void 0, false, {
               fileName: "<stdin>",
-              lineNumber: 257,
+              lineNumber: 279,
               columnNumber: 21
             }, this),
             /* @__PURE__ */ jsxDEV("option", { value: "education", children: "Education" }, void 0, false, {
               fileName: "<stdin>",
-              lineNumber: 258,
+              lineNumber: 280,
               columnNumber: 21
             }, this),
             /* @__PURE__ */ jsxDEV("option", { value: "social", children: "Social" }, void 0, false, {
               fileName: "<stdin>",
-              lineNumber: 259,
+              lineNumber: 281,
               columnNumber: 21
             }, this)
           ]
@@ -494,7 +512,7 @@ function ProjectSubmissionForm() {
         true,
         {
           fileName: "<stdin>",
-          lineNumber: 250,
+          lineNumber: 272,
           columnNumber: 17
         },
         this
@@ -513,14 +531,14 @@ function ProjectSubmissionForm() {
         false,
         {
           fileName: "<stdin>",
-          lineNumber: 261,
+          lineNumber: 283,
           columnNumber: 17
         },
         this
       )
     ] }, void 0, true, {
       fileName: "<stdin>",
-      lineNumber: 249,
+      lineNumber: 271,
       columnNumber: 13
     }, this),
     /* @__PURE__ */ jsxDEV(
@@ -536,7 +554,7 @@ function ProjectSubmissionForm() {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 270,
+        lineNumber: 292,
         columnNumber: 13
       },
       this
@@ -553,14 +571,14 @@ function ProjectSubmissionForm() {
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 277,
+        lineNumber: 299,
         columnNumber: 13
       },
       this
     )
   ] }, void 0, true, {
     fileName: "<stdin>",
-    lineNumber: 226,
+    lineNumber: 248,
     columnNumber: 9
   }, this);
 }
@@ -571,6 +589,6 @@ async function handleSupport(project) {
 const root = createRoot(document.getElementById("root"));
 root.render(/* @__PURE__ */ jsxDEV(App, {}, void 0, false, {
   fileName: "<stdin>",
-  lineNumber: 294,
+  lineNumber: 316,
   columnNumber: 13
 }));
