@@ -11,7 +11,7 @@ function App() {
     window.websim.getCurrentUser().then((user) => setCurrentUser(user));
   }, []);
   const { data: projects, loading } = useQuery(
-    room.collection("funding_projects").order(["-created_at"])
+    room.query("SELECT p.id, p.project_id, p.title, p.description, p.creator_username, p.project_url, p.thumbnail_url, p.current_funding, p.funding_goal, p.category, p.tags, p.featured, p.created_at FROM public.funding_projects p ORDER BY p.created_at DESC")
   );
   const categories = ["all", "games", "tools", "art", "education", "social"];
   const filteredProjects = projects?.filter((project) => {
