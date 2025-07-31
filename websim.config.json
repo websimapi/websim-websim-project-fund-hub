@@ -1,0 +1,72 @@
+{
+  "database": {
+    "schema": {
+      "funding_projects": {
+        "id": {
+          "type": "uuid",
+          "description": "The unique identifier for the funding project"
+        },
+        "project_id": {
+          "type": "text",
+          "description": "The websim project ID being funded"
+        },
+        "title": {
+          "type": "text",
+          "description": "Project title"
+        },
+        "description": {
+          "type": "text",
+          "description": "Project description"
+        },
+        "creator_username": {
+          "type": "text",
+          "description": "Username of the project creator"
+        },
+        "project_url": {
+          "type": "text",
+          "description": "Direct link to the project"
+        },
+        "thumbnail_url": {
+          "type": "text",
+          "description": "Project thumbnail URL"
+        },
+        "current_funding": {
+          "type": "integer",
+          "description": "Current funding amount in credits"
+        },
+        "funding_goal": {
+          "type": "integer",
+          "description": "Funding goal in credits"
+        },
+        "category": {
+          "type": "text",
+          "description": "Project category"
+        },
+        "tags": {
+          "type": "jsonb",
+          "description": "Array of project tags"
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Whether this project is featured"
+        }
+      },
+      "project_votes": {
+        "id": {
+          "type": "text",
+          "description": "user_id + project_id for uniqueness"
+        },
+        "project_id": {
+          "type": "text",
+          "description": "The project being voted on"
+        },
+        "vote_type": {
+          "type": "text",
+          "description": "Type of vote (support, test, share)"
+        }
+      }
+    },
+    "instructions": "Use this database to store funding projects and track user engagement. Each project entry should include the websim project ID, creator info, and funding details."
+  }
+}
+
